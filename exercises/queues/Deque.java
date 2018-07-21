@@ -2,6 +2,9 @@
 import java.util.Iterator;
 
 /**
+ * http://coursera.cs.princeton.edu/algs4/assignments/queues.html
+ *
+ * Implement a deque.
  *
  * @author devin
  * @param <Item>
@@ -9,15 +12,16 @@ import java.util.Iterator;
 public class Deque<Item> implements Iterable<Item> {
 
     /**
-     *
+     * Inner class to track nodes.
      */
     private class Node {
 
-        Item item;
-        Node previous;
-        Node next;
+        private final Item item;
+        private Node previous;
+        private Node next;
 
         /**
+         * Construct a node.
          *
          * @param item
          * @param previous
@@ -68,13 +72,19 @@ public class Deque<Item> implements Iterable<Item> {
         }
 
         size++;
-        // add the item to the front
 
-        //TODO case of size 0 or size 1 or size 2?
-        Node oldFirst = first;
-        first = new Node(item, null, oldFirst);
-        if (oldFirst != null) {
+        if (size() == 1) {
+            // last equals first....
+            first = new Node(item, null, null);
+            last = first;
+        } else {
+            // add the item to the end
+            Node oldFirst = first;
+            first = new Node(item, null, oldFirst);
             oldFirst.previous = first;
+            if (size() == 2) {
+                last = oldFirst;
+            }
         }
     }
 
@@ -89,12 +99,18 @@ public class Deque<Item> implements Iterable<Item> {
         }
 
         size++;
-        // add the item to the end
-        //TODO case of size 0 or size 1 or size 2?
-        Node oldLast = last;
-        last = new Node(item, oldLast, null);
-        if (oldLast != null) {
+
+        if (size() == 1) {
+            // first equals last....
+            last = new Node(item, null, null);
+            first = last;
+        } else {
+            Node oldLast = last;
+            last = new Node(item, oldLast, null);
             oldLast.next = last;
+            if (size() == 2) {
+                first = oldLast;
+            }
         }
     }
 
@@ -110,9 +126,16 @@ public class Deque<Item> implements Iterable<Item> {
         }
 
         size--;
-
         Item firstItem = first.item;
-        first = first.next;
+
+        if (first.next != null) {
+            first = first.next;
+            first.previous = null; //don't loiter
+        }
+        if (isEmpty()) {
+            first = null; //don't loiter
+            last = null; //don't loiter
+        }
         return firstItem;
     }
 
@@ -128,9 +151,16 @@ public class Deque<Item> implements Iterable<Item> {
         }
 
         size--;
-
         Item lastItem = last.item;
-        last = last.previous;
+
+        if (last.previous != null) {
+            last = last.previous;
+            last.next = null; //don't loiter
+        }
+        if (isEmpty()) {
+            first = null; //don't loiter
+            last = null; //don't loiter
+        }
         return lastItem;
     }
 
@@ -141,17 +171,17 @@ public class Deque<Item> implements Iterable<Item> {
 
     private class DequeIterator implements Iterator<Item> {
 
-        Node current = first;
+        private Node current = first;
 
         @Override
         public boolean hasNext() {
-            return first != null;
+            return current != null;
         }
 
         @Override
         public Item next() {
 
-            if (current == null) {
+            if (!hasNext()) {
                 throw new java.util.NoSuchElementException();
             }
 
@@ -173,6 +203,7 @@ public class Deque<Item> implements Iterable<Item> {
 
         intDeque.addFirst(1);
         assert (!intDeque.isEmpty());
+        assert (intDeque.size() == 1);
         int i = intDeque.removeFirst();
         assert (i == 1);
         assert (intDeque.isEmpty());
@@ -204,5 +235,45 @@ public class Deque<Item> implements Iterable<Item> {
         i = intDeque.removeLast();
         assert (i == 1);
         assert (intDeque.size() == 0);
+
+        intDeque.addFirst(1);
+        i = intDeque.removeLast();
+        assert (i == 1);
+
+        intDeque.addLast(1);
+        i = intDeque.removeFirst();
+        assert (i == 1);
+
+        intDeque.addFirst(1);
+        assert (intDeque.size() == 1);
+        intDeque.addFirst(2);
+        assert (intDeque.size() == 2);
+        intDeque.addFirst(3);
+        assert (intDeque.size() == 3);
+        intDeque.addFirst(4);
+        assert (intDeque.size() == 4);
+
+        Iterator<Integer> itr = intDeque.iterator();
+        while (itr.hasNext()) {
+            System.out.println(itr.next());
+        }
+        i = intDeque.removeFirst();
+        i = intDeque.removeFirst();
+        i = intDeque.removeFirst();
+        i = intDeque.removeFirst();
+
+        intDeque.addLast(1);
+        assert (intDeque.size() == 1);
+        intDeque.addLast(2);
+        assert (intDeque.size() == 2);
+        intDeque.addLast(3);
+        assert (intDeque.size() == 3);
+        intDeque.addLast(4);
+        assert (intDeque.size() == 4);
+
+        itr = intDeque.iterator();
+        while (itr.hasNext()) {
+            System.out.println(itr.next());
+        }
     }
 }
